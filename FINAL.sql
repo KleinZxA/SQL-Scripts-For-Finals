@@ -11,18 +11,36 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
--- -----------------------------------------------------
--- Schema studGrade
--- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
 -- Table `mydb`.`department`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`department` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `department_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`grade_category`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`grade_category` (
+  `grade_category_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `category_name` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`grade_category_id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `mydb`.`subject`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`subject` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `subject_code` VARCHAR(45) NOT NULL,
+  `subject_name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -31,19 +49,8 @@ ENGINE = InnoDB;
 -- Table `mydb`.`user_type`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`user_type` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `user_type_name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`subject`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`subject` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `subject_code` VARCHAR(45) NOT NULL,
-  `subject_name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -52,24 +59,25 @@ ENGINE = InnoDB;
 -- Table `mydb`.`users`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`users` (
-  `id` INT NOT NULL AUTO_INCREMENT,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
   `first_name` VARCHAR(45) NOT NULL,
   `last_name` VARCHAR(45) NOT NULL,
   `birthday` DATE NOT NULL,
-  `contact` INT NOT NULL,
+  `contact` INT(11) NOT NULL,
   `address` VARCHAR(45) NOT NULL,
-  `dept_id` INT NOT NULL,
-  `user_type` INT NOT NULL,
+  `dept_id` INT(11) NOT NULL,
+  `user_type` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `dept_idFK_idx` (`dept_id` ASC) VISIBLE,
-  CONSTRAINT `user_typeFK`
-    FOREIGN KEY (`user_type`)
-    REFERENCES `mydb`.`user_type` (`user_type`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `user_typeFK_idx` (`user_type` ASC) VISIBLE,
   CONSTRAINT `dept_idFK`
     FOREIGN KEY (`dept_id`)
     REFERENCES `mydb`.`department` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `user_typeFK`
+    FOREIGN KEY (`user_type`)
+    REFERENCES `mydb`.`user_type` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -79,9 +87,9 @@ ENGINE = InnoDB;
 -- Table `mydb`.`subject_handled_by`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`subject_handled_by` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `user_id` INT NOT NULL,
-  `subject_id` INT NOT NULL,
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` INT(11) NOT NULL,
+  `subject_id` INT(11) NOT NULL,
   `sched_time_date` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `subj_idFK_idx` (`subject_id` ASC) VISIBLE,
@@ -100,34 +108,25 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`grade_category`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`grade_category` (
-  `grade_category_id` INT NOT NULL AUTO_INCREMENT,
-  `category_name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`grade_category_id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `mydb`.`grade`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`grade` (
-  `gradeID` INT NOT NULL AUTO_INCREMENT,
-  `student_id` INT NOT NULL,
-  `grade_category` INT NOT NULL,
-  `subject_handle_id` INT NOT NULL,
+  `gradeID` INT(11) NOT NULL AUTO_INCREMENT,
+  `student_id` INT(11) NOT NULL,
+  `grade_category` INT(11) NOT NULL,
+  `subject_handle_id` INT(11) NOT NULL,
   PRIMARY KEY (`gradeID`),
-  INDEX `gradeFK_idx` (`student_id` ASC, `grade_category` ASC, `subject_handle_id` ASC) VISIBLE,
   INDEX `gradeCategoryFK_idx` (`grade_category` ASC) VISIBLE,
-  CONSTRAINT `gradeFK`
-    FOREIGN KEY (`student_id` , `grade_category` , `subject_handle_id`)
-    REFERENCES `mydb`.`subject_handled_by` (`id` , `id` , `id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+  INDEX `gradeFK_idx` (`subject_handle_id` ASC) VISIBLE,
+  INDEX `stud_idFK` (`student_id` ASC) VISIBLE,
   CONSTRAINT `gradeCategoryFK`
     FOREIGN KEY (`grade_category`)
     REFERENCES `mydb`.`grade_category` (`grade_category_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `gradeFK`
+    FOREIGN KEY (`subject_handle_id`)
+    REFERENCES `mydb`.`subject_handled_by` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `stud_idFK`
