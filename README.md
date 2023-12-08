@@ -1,2 +1,4 @@
 # SQL-Scripts-For-Finals
-SQL scripts for Final Project (Database part)
+SQL scripts for Grading System with login function
+
+> You can edit the script to suit your own use case
